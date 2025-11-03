@@ -18,7 +18,7 @@ Open gcloud terminal and run below command (Which make image copy of vm with VMX
 
 ```
 gcloud compute images create nested-ubuntu-image \
---source-disk=ubuntu --source-disk-zone=us-west4-b \
+--source-disk=ubuntu --source-disk-zone=asia-south-1c \
  --licenses="https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx"
 ```
 
