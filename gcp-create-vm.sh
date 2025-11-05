@@ -51,15 +51,43 @@ echo
 read -p "How many new instances would you like to create from image '$IMAGE_NAME'? " COUNT
 read -p "Enter zone to create the new instances in (e.g. asia-south1-c): " NEW_ZONE
 
-# Create the instances
-for ((i=1; i<=COUNT; i++)); do
-  NEW_INSTANCE="${INSTANCE_NAME}-clone-$i"
-  echo "Creating instance: $NEW_INSTANCE in zone: $NEW_ZONE ..."
-  gcloud compute instances create "$NEW_INSTANCE" \
-    --zone="$NEW_ZONE" \
-    --image="$IMAGE_NAME" \
-    --machine-type=e2-medium
+echo
+echo "Fetching available machine types for zone '$NEW_ZONE'..."
+mapfile -t machinetypes < <(gcloud compute machine-types list --zones="$NEW_ZONE" --format="value(name)" | sort)
+
+if [ ${#machinetypes[@]} -eq 0 ]; then
+  echo "No machine types found for zone $NEW_ZONE. Check your zone or permissions."
+  exit 1
+fi
+
+echo "Available machine types:"
+for i in "${!machinetypes[@]}"; do
+  echo "$((i+1)). ${machinetypes[$i]}"
 done
 
 echo
-echo "Done! Created $COUNT new instances from image '$IMAGE_NAME' in zone '$NEW_ZONE'."
+read -p "Select the machine type number you want to use: " m_choice
+m_index=$((m_choice-1))
+
+if [ $m_index -lt 0 ] || [ $m_index -ge ${#machinetypes[@]} ]; then
+  echo "Invalid selection."
+  exit 1
+fi
+
+MACHINE_TYPE=${machinetypes[$m_index]}
+echo
+echo "You selected machine type: $MACHINE_TYPE"
+echo
+
+# Create the instances
+for ((i=1; i<=COUNT; i++)); do
+  NEW_INSTANCE="${INSTANCE_NAME}-clone-$i"
+  echo "Creating instance: $NEW_INSTANCE in zone: $NEW_ZONE (type: $MACHINE_TYPE) ..."
+  gcloud compute instances create "$NEW_INSTANCE" \
+    --zone="$NEW_ZONE" \
+    --image="$IMAGE_NAME" \
+    --machine-type="$MACHINE_TYPE"
+done
+
+echo
+echo "✅ Done! Created $COUNT new instances from image '$IMAGE_NAME' using machine type '$MACHINE_TYPE' in zone '$NEW_ZONE'."
