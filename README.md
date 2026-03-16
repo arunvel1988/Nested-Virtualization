@@ -17,10 +17,10 @@ Create ubuntu instance with N2 machine type (4vCPU, 2 Core, 16 GB memry) and do 
 Open gcloud terminal and run below command (Which make image copy of vm with VMX enabled)
 
 ```
-gcloud compute instances stop ubuntu --zone=asia-south1-c
+gcloud compute instances stop ubuntu --zone=asia-south1-b
 
 gcloud compute images create nested-ubuntu-image \
---source-disk=ubuntu --source-disk-zone=asia-south-1c \
+--source-disk=ubuntu --source-disk-zone=asia-south1-b \
  --licenses="https://www.googleapis.com/compute/v1/projects/vm-options/global/licenses/enable-vmx"
 ```
 
